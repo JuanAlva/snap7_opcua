@@ -1,0 +1,5 @@
+PLC_IP = "192.168.146.151"
+PLC_RACK = 0
+PLC_SLOT = 1
+
+OPCUA_SERVER_URL = "opc.tcp://0.0.0.0:4840" # "opc.tcp://192.168.146.67:4840"
