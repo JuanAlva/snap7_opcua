@@ -38,7 +38,7 @@ def main():
                 logging.info(f"Esperando {RECONNECT_INTERVAL} segundos antes de reconectar...")
                 time.sleep(RECONNECT_INTERVAL)
 
-            time.sleep(1)
+            time.sleep(1) # modificar en caso se quiera aumentar el tiempo de muestreo
                 
     except KeyboardInterrupt:
         logging.info("Detenido por usuario")
