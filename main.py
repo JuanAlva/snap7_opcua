@@ -16,29 +16,30 @@ def main():
     plc = PLCClient(ip=PLC_IP, rack=PLC_RACK, slot=PLC_SLOT)
     opcua = OPCUAServer()
     
-    var_config = cargar_variables_desde_archivo("prueba") # archivo con datos en formato ASCII
+    var_config = cargar_variables_desde_archivo(ARCHIVO_EXTRAIDO_DEL_PLC) # archivo con datos en formato ASCII
     manager = OPCUAVariableManager(plc, opcua, var_config)
 
     opcua.start()
 
     try:
         while True:
-            try:
-                if not plc.connected:
-                    logging.info("PLC no conectado. Intentando reconectar...")
-                    plc.try_reconnect(retry_delay=RECONNECT_INTERVAL)
+            if not plc.connected:
+                logging.warning("PLC no conectado. Intentando reconectar...")
+                plc.try_reconnect(retry_delay=RECONNECT_INTERVAL)
+                time.sleep(RECONNECT_INTERVAL)
+                continue  # no intentes leer si aún no conecta
 
+            try:
                 manager.update_variables()
-                logging.info(f"[Valores actualizados]")
-            
-            except RuntimeError as e:
-                logging.error(f"Error de conexión con PLC: {e}")
-                plc.disconnect() # asegurate de cerrar la sesion malograda
+                logging.info("[Valores actualizados]")
+            except Exception as e:
+                logging.error(f"[main] Error al actualizar variables: {e}")
+                plc.disconnect()
                 logging.info(f"Esperando {RECONNECT_INTERVAL} segundos antes de reconectar...")
                 time.sleep(RECONNECT_INTERVAL)
 
-            time.sleep(1) # ciclo de lectura
-            
+            time.sleep(1)
+                
     except KeyboardInterrupt:
         logging.info("Detenido por usuario")
     

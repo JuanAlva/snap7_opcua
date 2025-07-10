@@ -16,6 +16,7 @@ class PLCClient:
     # -------------------- Conexión --------------------
     def connect(self):
         try:
+            self.client = snap7.client.Client()  # <-- nuevo cliente limpio
             self.client.connect(self.ip, self.rack, self.slot)
             self.connected = self.client.get_connected()
             if self.connected:
@@ -34,6 +35,7 @@ class PLCClient:
 
     def try_reconnect(self, retry_delay=5, max_attempts=None):
         attempts = 0
+        self.disconnect()  # <-- asegura limpieza antes de intentar
         while not self.connected:
             try:
                 logging.info("Intentando reconectar al PLC...")
@@ -48,6 +50,17 @@ class PLCClient:
                 logging.error("Máximo número de reintentos alcanzado")
                 break
             time.sleep(retry_delay)
+
+    def safe_read(self, read_func, *args, **kwargs):
+        try:
+            if not self.connected:
+                raise RuntimeError("PLC no conectado")
+            return read_func(*args, **kwargs)
+        except Exception as e:
+            if "Connection reset by peer" in str(e) or "communication" in str(e).lower():
+                logging.error(f"[PLCClient] Error de conexión: {e}")
+                self.connected = False
+            raise  # para que lo capture `variable_manager`
 
     # -------------------- Lecturas genéricas --------------------
     def _chk(self):

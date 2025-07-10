@@ -27,22 +27,26 @@ class OPCUAVariableManager:
         byte_index = var["byte"]
         bit_index = var.get("bit")  # solo para BOOL
 
+        # manejo de funciones en base a tipo de senial (in, out, marca, db) y tipo de dato (bool, int, real, string)
+        # las funciones estan en plc_client.py
+        # modificar aca si se quiere agregar funciones en string o real
+        # modificar aca si se agregaran db del plc
         if area == "E":  # Entradas
             if var["type"] == "BOOL":
-                return self.plc.read_bit_in(byte_index, bit_index)
+                return self.plc.safe_read(self.plc.read_bit_in, byte_index, bit_index)
             elif var["type"] == "WORD":
-                return self.plc.read_int_in(byte_index)
+                return self.plc.safe_read(self.plc.read_int_in, byte_index)
 
         elif area == "A":  # Salidas
             if var["type"] == "BOOL":
-                return self.plc.read_bit_out(byte_index, bit_index)
+                return self.plc.safe_read(self.plc.read_bit_out, byte_index, bit_index)
             elif var["type"] == "WORD":
-                return self.plc.read_int_out(byte_index)
+                return self.plc.safe_read(self.plc.read_int_out, byte_index)
 
         elif area == "M":  # Marcas
             if var["type"] == "BOOL":
-                return self.plc.read_bit_mrk(byte_index, bit_index)
+                return self.plc.safe_read(self.plc.read_bit_mrk, byte_index, bit_index)
             elif var["type"] == "WORD":
-                return self.plc.read_int_mrk(byte_index)
+                return self.plc.safe_read(self.plc.read_int_mrk, byte_index)
 
         raise ValueError(f"Tipo de área no reconocida: {area}")

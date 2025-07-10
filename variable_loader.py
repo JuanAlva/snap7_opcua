@@ -2,6 +2,7 @@ import csv
 
 def cargar_variables_desde_archivo(path):
     variables = []
+    # modificar aca si el tipo de archivo extraido del plc es distinto, como UTF-8. Para ASCII es latin-1.
     with open(path, encoding='latin-1') as f:
         reader = csv.reader(f)
         for row in reader:
